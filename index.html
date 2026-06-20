@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PlotterSlicer v0.3</title>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="app">
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">PlotterSlicer <span>v0.3</span></div>
+  <div class="sep"></div>
+  <button class="tbtn" id="importBtn">&#8659; Import SVG</button>
+  <input type="file" id="fileInput" accept=".svg" style="display:none"/>
+  <button class="tbtn" id="sliceBtn" style="display:none">&#9658; Slice</button>
+  <button class="tbtn" id="previewBtn" style="display:none">&#9632; Preview</button>
+  <button class="tbtn act" id="dlBtn" style="display:none">&#8659; Download .gcode</button>
+  <div class="spacer"></div>
+  <div class="pill">Phase 1 &mdash; Slicer</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- LEFT SIDEBAR -->
+  <div class="sidebar-l">
+    <div class="nav-tabs">
+      <div class="navitem active" data-sec="file">&#128193; File</div>
+      <div class="navitem" data-sec="machine">&#9881; Machine</div>
+      <div class="navitem" data-sec="gcsettings">&#60;/&#62; G-code</div>
+      <div class="navitem" data-sec="layers">&#9776; Layers</div>
+    </div>
+    <div class="scontent" id="scontent"></div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-area">
+    <div class="ctoolbar">
+      <span id="bedLabel">Bed: 200×200 mm</span>
+      <span>&nbsp;|&nbsp;</span>
+      <span id="originLabel">Origin: Bottom Left</span>
+      <span id="posLabel"></span>
+    </div>
+    <div class="cwrap" id="cwrap">
+      <canvas id="bed"></canvas>
+      <div class="empty-hint" id="emptyHint">
+        <div class="big">&#9998;</div>
+        <p>Import an SVG to begin</p>
+        <p style="margin-top:4px;font-size:10px">Use File panel or drag & drop</p>
+      </div>
+    </div>
+
+    <!-- PLAYBACK BAR -->
+    <div class="playbar" id="playbar">
+      <div class="play-controls">
+        <button class="pbtn" id="playRewind" title="Rewind">&#9664;&#9664;</button>
+        <button class="pbtn act" id="playBtn" title="Play/Pause">&#9654;</button>
+        <button class="pbtn" id="playEnd" title="End">&#9654;&#9654;</button>
+        <div class="slider-wrap">
+          <input type="range" id="playSlider" min="0" max="1000" value="0" step="1"/>
+        </div>
+        <span class="play-stat" id="playStat">Move 0 / 0</span>
+      </div>
+      <div class="play-legend">
+        <div class="pl-row"><div class="pl-line" style="background:#56d364"></div>Draw (G1)</div>
+        <div class="pl-row"><div class="pl-dash" style="border-color:#4da6ff"></div>Travel (G0)</div>
+        <div class="pl-row"><div style="width:8px;height:8px;border-radius:50%;background:#e3b341;flex-shrink:0"></div>Pen event</div>
+        <div class="pl-row" style="margin-left:auto"><span style="color:var(--text-dim);font-size:9px">drag slider to scrub</span></div>
+      </div>
+    </div>
+
+    <div class="statusbar">
+      <span id="statusText">No file loaded</span>
+      <span id="segCount" style="display:none" class="status-green"></span>
+    </div>
+  </div>
+
+  <!-- RIGHT SIDEBAR -->
+  <div class="sidebar-r">
+    <div class="psec">
+      <div class="ptitle">Transform</div>
+      <div id="propPanel"><div style="font-size:10px;color:var(--text-dim)">No object selected</div></div>
+    </div>
+    <div class="psec">
+      <div class="ptitle">Actions</div>
+      <div id="actPanel"><div style="font-size:10px;color:var(--text-dim)">Import a file first</div></div>
+    </div>
+    <div class="psec">
+      <div class="ptitle">Bed Info</div>
+      <div class="info-row">Size: <span id="bedInfo">200×200 mm</span></div>
+      <div class="info-row">Origin: <span id="originInfo">Bottom Left</span></div>
+      <div class="info-row" id="gcInfo" style="display:none">G-code: <span class="status-green" id="gcCount"></span></div>
+    </div>
+  </div>
+</div><!-- .main -->
+
+<!-- BOTTOM -->
+<div class="bottom">
+  <div class="gc-panel">
+    <div class="ph"><span>G-code viewer</span><span id="gcLineCount" style="color:var(--green)"></span></div>
+    <div class="gcview" id="gcview"><div class="gc-empty">No G-code yet — import an SVG and click Slice</div></div>
+  </div>
+  <div class="legend-panel">
+    <div class="ph"><span>Phase Status</span></div>
+    <div class="legend-body">
+      <div class="todo-done" style="font-size:9.5px">&#10003; SVG import</div>
+      <div class="todo-done" style="font-size:9.5px">&#10003; Bed view + grid</div>
+      <div class="todo-done" style="font-size:9.5px">&#10003; Move / Scale / Mirror</div>
+      <div class="todo-done" style="font-size:9.5px">&#10003; NN path optimizer</div>
+      <div class="todo-done" style="font-size:9.5px">&#10003; Clean G-code (no artifacts)</div>
+      <div class="todo-done" style="font-size:9.5px">&#10003; Toolpath scrub slider</div>
+      <div class="todo-done" style="font-size:9.5px">&#10003; Download .gcode</div>
+      <div class="todo-sec">
+        <div style="font-size:9px;color:var(--text-dim);margin-bottom:4px;font-weight:700">PHASE 2</div>
+        <div class="todo-row">&#9675; Image → vector (Potrace)</div>
+        <div class="todo-row">&#9675; PDF.js import</div>
+        <div class="todo-row">&#9675; Text tool</div>
+        <div class="todo-row">&#9675; DXF import</div>
+        <div class="todo-row">&#9675; ESP32 send</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- .app -->
+
+<script src="js/state.js"></script>
+<script src="js/svg-parser.js"></script>
+<script src="js/path-sampler.js"></script>
+<script src="js/optimizer.js"></script>
+<script src="js/gcode.js"></script>
+<script src="js/render.js"></script>
+<script src="js/playback.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/properties.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
