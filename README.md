@@ -1,15 +1,15 @@
 ![Version](https://img.shields.io/badge/version-v0.3-blue)
 ![Status](https://img.shields.io/badge/status-active-success)
 
-# PlotStudio
+# PlotterNC Studio
 
 **Open-source plotting, CAM, and slicing software for PlotOS-powered machines.**
 
-![PlotStudio Toolpath Preview](image-1.png)
+![PlotterNC Studio Toolpath Preview](src/image-1.png)
 
-PlotStudio is a modern web-based CAM application designed for pen plotters and other 2D CNC machines. It allows users to import vector artwork, generate optimized toolpaths, preview jobs, and export machine-ready G-code directly from the browser.
+PlotterNC Studio is a modern web-based CAM application designed for pen plotters and other 2D CNC machines. It allows users to import vector artwork, generate optimized toolpaths, preview jobs, and export machine-ready G-code directly from the browser.
 
-> PlotStudio currently focuses on CAM and toolpath generation for pen plotters. Support for additional PlotOS-powered machines is planned for future releases.
+> PlotterNC Studio currently focuses on CAM and toolpath generation for pen plotters. Support for additional PlotOS-powered machines is planned for future releases.
 
 ---
 
@@ -62,13 +62,13 @@ Export
 
 ## Try it Now
 
-**PlotStudio Demo:** https://deaptayan.github.io/PlotStudio/
+**PlotterNC Studio Demo:** https://deaptayan.github.io/PlotterNC Studio/
 
 ---
 
 ## Screenshots
 
-![PlotStudio Interface](image.png)
+![PlotterNC Studio Interface](src/image.png)
 
 
 ---
@@ -172,7 +172,7 @@ Repository: Coming Soon
 
 Active Development
 
-PlotStudio v0.3 is a functional web-based CAM application capable of importing SVG files, generating optimized toolpaths, previewing jobs, and exporting machine-ready G-code.
+PlotterNC Studio v0.3 is a functional web-based CAM application capable of importing SVG files, generating optimized toolpaths, previewing jobs, and exporting machine-ready G-code.
 
 ---
 
