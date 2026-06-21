@@ -15,7 +15,7 @@
   <div class="sep"></div>
   <button class="tbtn" id="importBtn">&#8659; Import SVG</button>
   <input type="file" id="fileInput" accept=".svg" style="display:none"/>
-  <button class="tbtn" id="sliceBtn" style="display:none">&#9658; Slice</button>
+  <button class="tbtn primary" id="sliceBtn" style="display:none">&#9658; Slice</button>
   <button class="tbtn" id="previewBtn" style="display:none">&#9632; Preview</button>
   <button class="tbtn act" id="dlBtn" style="display:none">&#8659; Download .gcode</button>
   <div class="spacer"></div>
@@ -43,6 +43,11 @@
       <span>&nbsp;|&nbsp;</span>
       <span id="originLabel">Origin: Bottom Left</span>
       <span id="posLabel"></span>
+    </div>
+    <div class="bounds-warning" id="boundsWarning" style="display:none">
+      <span class="bw-icon">&#9888;</span>
+      <span id="boundsWarningText">Object doesn't fit the bed</span>
+      <button class="bw-fix" id="boundsFixBtn">Fit to Bed</button>
     </div>
     <div class="cwrap" id="cwrap">
       <canvas id="bed"></canvas>
@@ -128,9 +133,11 @@
 </div><!-- .app -->
 
 <script src="js/state.js"></script>
+<script src="js/history.js"></script>
 <script src="js/svg-parser.js"></script>
 <script src="js/path-sampler.js"></script>
 <script src="js/optimizer.js"></script>
+<script src="js/hatch-fill.js"></script>
 <script src="js/gcode.js"></script>
 <script src="js/render.js"></script>
 <script src="js/playback.js"></script>

@@ -63,6 +63,21 @@ function splitIntoSubpathStrings(d){
   return segments.filter(s=>s.length>=2).map(s=>'M'+s.map(p=>p[0]+','+p[1]).join(' L'));
 }
 
+// Parses an SVG length attribute like "800px", "21mm", "8.5in", "100" (unitless
+// = px per the SVG/CSS spec) into millimetres. Percentage values can't be
+// resolved without a containing-block size, so they're treated as absent.
+function parseLengthToMM(str){
+  if(!str) return null;
+  const m=String(str).trim().match(/^([0-9.+-eE]+)\s*(px|mm|cm|in|pt|pc|%)?$/);
+  if(!m) return null;
+  const val=parseFloat(m[1]);
+  if(isNaN(val)) return null;
+  const unit=m[2]||'px';
+  const factors={ px:25.4/96, mm:1, cm:10, in:25.4, pt:25.4/72, pc:25.4/6 };
+  if(unit==='%') return null;
+  return val*factors[unit];
+}
+
 function parseSVG(text){
   const parser=new DOMParser();
   const doc=parser.parseFromString(text,'image/svg+xml');
@@ -75,10 +90,64 @@ function parseSVG(text){
     const sh=svg&&parseFloat(svg.getAttribute('height'));
     if(sw)vbW=sw; if(sh)vbH=sh;
   }
-  const paths=[];
-  function addPath(d){
+
+  // REAL PHYSICAL SIZE: the SVG's width/height attributes (e.g. "800px",
+  // "21mm") describe the artwork's intended physical size — separate from
+  // viewBox, which only defines the internal coordinate space used by the
+  // path data. We resolve both so the app can load the drawing at the size
+  // its author intended by default, rather than an arbitrary guess.
+  let physW=null, physH=null;
+  if(svg){
+    physW=parseLengthToMM(svg.getAttribute('width'));
+    physH=parseLengthToMM(svg.getAttribute('height'));
+  }
+  // No usable width/height (or percentage-based): fall back to treating
+  // viewBox units as CSS px, the standard behaviour browsers use when an
+  // SVG has a viewBox but no explicit physical size.
+  if(physW==null||physH==null){
+    physW=vbW*(25.4/96);
+    physH=vbH*(25.4/96);
+  }
+
+  const paths=[];      // flat list, all subpaths — used by outline mode & edit-mode preview
+  const shapes=[];     // grouped by source element — used by hatch-fill (exact mode)
+
+  // Resolves the effective fill / fill-rule for an element, walking up
+  // through inherited attributes (covers the common "fill set on a parent
+  // <g>" pattern) and CSS shorthand in a style="" attribute.
+  function effectiveFill(el){
+    let cur=el;
+    while(cur&&cur.nodeType===1){
+      const style=cur.getAttribute('style')||'';
+      const styleMatch=style.match(/fill\s*:\s*([^;]+)/i);
+      const attr=cur.getAttribute('fill');
+      const val=styleMatch?styleMatch[1].trim():attr;
+      if(val) return val;
+      cur=cur.parentElement;
+    }
+    return '#000000'; // SVG default fill when unspecified is black, not none
+  }
+  function effectiveFillRule(el){
+    let cur=el;
+    while(cur&&cur.nodeType===1){
+      const style=cur.getAttribute('style')||'';
+      const styleMatch=style.match(/fill-rule\s*:\s*([^;]+)/i);
+      const attr=cur.getAttribute('fill-rule')||cur.getAttribute('clip-rule');
+      const val=styleMatch?styleMatch[1].trim():attr;
+      if(val) return val==='evenodd'?'evenodd':'nonzero';
+      cur=cur.parentElement;
+    }
+    return 'nonzero';
+  }
+
+  function addPath(d,el){
     if(!d||!d.trim()) return;
-    splitIntoSubpathStrings(d).forEach(sub=>{if(sub&&sub.trim())paths.push(sub);});
+    const subs=splitIntoSubpathStrings(d).filter(s=>s&&s.trim());
+    if(!subs.length) return;
+    subs.forEach(sub=>paths.push(sub));
+    const fill=effectiveFill(el);
+    const hasFill=!(fill==='none'||fill==='transparent');
+    shapes.push({subpaths:subs, fill, fillRule:effectiveFillRule(el), hasFill});
   }
   doc.querySelectorAll('path,rect,circle,ellipse,line,polyline,polygon').forEach(el=>{
     try{
@@ -111,8 +180,18 @@ function parseSVG(text){
           if(t==='polygon') d+=' Z';
         }
       }
-      addPath(d);
+      if(t==='line'){
+        // A <line> is a single open stroke — never a fillable region, even
+        // if a fill attribute happens to be present (browsers ignore it too).
+        if(d&&d.trim()){
+          const subs=splitIntoSubpathStrings(d).filter(s=>s&&s.trim());
+          subs.forEach(sub=>paths.push(sub));
+          if(subs.length) shapes.push({subpaths:subs, fill:'none', fillRule:'nonzero', hasFill:false});
+        }
+      }else{
+        addPath(d,el);
+      }
     }catch(e){}
   });
-  return{paths,vbW,vbH};
+  return{paths,shapes,vbW,vbH,physW,physH};
 }

@@ -1,42 +1,122 @@
-![Version](https://img.shields.io/badge/version-v0.3-blue)
+![Version](https://img.shields.io/badge/version-v0.3.7-blue)
 ![Status](https://img.shields.io/badge/status-active-success)
 
 # PlotterNC Studio
 
-**Open-source plotting, CAM, and slicing software for PlotOS-powered machines.**
+**Open-source plotting and CAM software for PlotterNC-powered machines.**
 
 ![PlotterNC Studio Toolpath Preview](src/image-1.png)
 
-PlotterNC Studio is a modern web-based CAM application designed for pen plotters and other 2D CNC machines. It allows users to import vector artwork, generate optimized toolpaths, preview jobs, and export machine-ready G-code directly from the browser.
+PlotterNC Studio is a modern web-based CAM application designed for pen plotters and other 2D CNC machines. It allows users to import vector artwork, generate optimized toolpaths, preview jobs, simulate machine motion, and export machine-ready G-code directly from the browser.
 
-> PlotterNC Studio currently focuses on CAM and toolpath generation for pen plotters. Support for additional PlotOS-powered machines is planned for future releases.
+> PlotterNC Studio currently focuses on CAM and toolpath generation for pen plotters. Support for additional PlotterNC-powered machines is planned for future releases.
 
 ---
 
 ## Highlights
 
-- SVG → G-code workflow
-- Browser-based operation
-- Toolpath optimization
-- Interactive workspace
-- Toolpath simulation
-- GitHub Pages deployment
+* SVG → G-code workflow
+* Browser-based operation
+* Interactive workspace
+* Toolpath optimization
+* Toolpath simulation
+* Undo / Redo support
+* Exact SVG fill mode
+* Out-of-bounds protection
+* GitHub Pages deployment
+
+---
 
 ## Features
 
-### Current Features
+### Import & File Handling
 
 * SVG Import
-* SVG Path Parsing
+* Drag & Drop SVG Import
+* Native SVG Size Detection
+* Multi-Subpath SVG Parsing
+* Layer-Aware SVG Processing
+
+### Fill Modes
+
+* Outline Only Mode
+* Exact as SVG Fill Mode
+* Hole-Aware Fill Handling
+* Adjustable Hatch Spacing
+* Adjustable Sample Quality
+
+### Object Transform
+
+* Drag to Move
+* Resize Handles
+* Width / Height Editing
+* Lock Aspect Ratio
+* Scale X / Scale Y
+* Mirror Horizontal
+* Mirror Vertical
+* Center on Bed
+* Fit to Bed
+* Native SVG Size Restore
+* Multi-Unit Support (mm / cm / in / px)
+* Remove Object
+
+### Editing
+
+* Undo
+* Redo
+* Ctrl+Z Support
+* Ctrl+Shift+Z Support
+* Ctrl+Y Support
+
+### Bed & Machine
+
+* 200×200 Bed Preset
+* 300×300 Bed Preset
+* 500×500 Bed Preset
+* Custom Bed Sizes
+* Origin Selection
+
+  * Top Left
+  * Bottom Left
+  * Center
+* Out-of-Bounds Detection
+* Warning Banner
+* One-Click Fit to Bed
+* Invalid Slice Protection
+
+### G-code & CAM
+
 * Toolpath Generation
-* Path Optimization
-* G-code Generation
-* Toolpath Preview
-* Workspace Visualization
-* Layer Management
+* Nearest-Neighbor Path Optimization
+* Feedrate Configuration
+* Travel Speed Configuration
+* Custom Pen Up Commands
+* Custom Pen Down Commands
+* Syntax Highlighted G-code Viewer
 * G-code Export
-* Modern Web Interface
-* Runs entirely in the browser
+
+### Preview & Playback
+
+* Toolpath Scrubbing
+* Playback Controls
+* Play
+* Pause
+* Rewind
+* Jump to End
+* Draw Path Visualization
+* Travel Path Visualization
+* Pen Event Visualization
+* Live Tool Position Tracking
+
+### Interface
+
+* Modern Dark Theme
+* File Panel
+* Machine Panel
+* G-code Panel
+* Layers Panel
+* Feature Status Checklist
+* Browser-Based Workflow
 
 ---
 
@@ -62,7 +142,8 @@ Export
 
 ## Try it Now
 
-**PlotterNC Studio Demo:** https://deaptayan.github.io/PlotterNCStudio/
+**PlotterNC Studio Demo:**
+https://deaptayan.github.io/PlotterNCStudio/
 
 ---
 
@@ -70,86 +151,131 @@ Export
 
 ![PlotterNC Studio Interface](src/image.png)
 
+---
+
+## What's New in v0.3.7
+
+### New Features
+
+* Exact as SVG fill mode
+* Adjustable hatch spacing
+* Drag-to-resize handles
+* Undo / Redo system
+* Native SVG size detection
+* Native SVG size restore button
+* Multi-unit transform system
+* Out-of-bounds warning banner
+* One-click Fit to Bed action
+* Invalid slice protection
+* Improved slice workflow
+
+### Fixes
+
+* Fixed proportional resize flickering
+* Fixed out-of-bounds slicing
+* Improved warning visibility
+* Fixed stale project packaging issues
+* Fixed clearHistory loading issues
 
 ---
 
 ## Roadmap
 
-### v0.3 - Core Slicer Foundation ✅
+### v0.3.7 - Current Release ✅
 
 #### Completed
 
-* [x] Modern dark-themed UI
-* [x] SVG file import
-* [x] SVG path parsing
-* [x] Workspace and machine bed visualization
-* [x] Coordinate grid system
-* [x] Object transform controls
-
-  * [x] Move
-  * [x] Scale
-  * [x] Mirror
-* [x] Toolpath generation
-* [x] Path sampling engine
-* [x] Path optimization
-* [x] G-code generation
-* [x] G-code viewer
-* [x] Toolpath preview
-* [x] Travel path visualization
-* [x] Pen event visualization
-* [x] Playback timeline / scrubber
-* [x] G-code export (.gcode)
-* [x] Bed information panel
-* [x] Feature status tracking
-* [x] Browser-based workflow (no installation required)
-* [x] GitHub Pages deployment
-
----
-
-### v0.4 - Plotter Workflow Improvements
-
-* [ ] Machine profiles
-* [ ] Custom bed sizes
-* [ ] Feedrate controls
-* [ ] Pen up/down configuration
-* [ ] Plot statistics
-
-  * [ ] Estimated plot time
-  * [ ] Travel distance
-  * [ ] Draw distance
-* [ ] Improved path optimization
-* [ ] Multi-object selection
-* [ ] Undo / Redo system
-* [ ] Direct PlotOS integration
+* [x] SVG Import
+* [x] Native SVG Size Detection
+* [x] Drag & Drop Import
+* [x] Multi-Subpath Parsing
+* [x] Outline Mode
+* [x] Exact SVG Fill Mode
+* [x] Adjustable Hatch Spacing
+* [x] Adjustable Sample Quality
+* [x] Drag Move
+* [x] Resize Handles
+* [x] Width / Height Editing
+* [x] Lock Aspect Ratio
+* [x] Scale X / Scale Y
+* [x] Mirror Horizontal
+* [x] Mirror Vertical
+* [x] Center on Bed
+* [x] Fit to Bed
+* [x] Native SVG Size Restore
+* [x] Undo / Redo
+* [x] Multi-Unit Support
+* [x] Bed Presets
+* [x] Custom Bed Sizes
+* [x] Origin Selection
+* [x] Out-of-Bounds Detection
+* [x] Slice Protection
+* [x] Toolpath Generation
+* [x] Path Optimization
+* [x] Feedrate Configuration
+* [x] Travel Speed Configuration
+* [x] Pen Commands
+* [x] G-code Viewer
+* [x] G-code Export
+* [x] Playback Controls
+* [x] Toolpath Scrubbing
+* [x] Live Preview
+* [x] GitHub Pages Deployment
 
 ---
 
-### v0.5 - Advanced Import Tools
+### v0.4 - Workflow & Machine Integration
 
-* [ ] PDF import
-* [ ] DXF import
-* [ ] Image import (PNG/JPG)
-* [ ] Automatic image vectorization
-* [ ] Layer operations
-* [ ] Path editing tools
+* [ ] A4 Paper Preset
+* [ ] A3 Paper Preset
+* [ ] A5 Paper Preset
+* [ ] Additional Standard Paper Sizes
+* [ ] Machine Profiles
+* [ ] Profile Manager
+* [ ] Estimated Plot Time
+* [ ] Draw Distance Statistics
+* [ ] Travel Distance Statistics
+* [ ] Multi-Object Selection
+* [ ] Group / Ungroup Objects
+* [ ] Direct PlotterNC Upload
+* [ ] PlotterNC WiFi Connection
+* [ ] Job Queue System
+* [ ] Workspace Improvements
+
+---
+
+### v0.5 - Advanced Import & Editing
+
+* [ ] PDF Import
+* [ ] DXF Import
+* [ ] PNG Import
+* [ ] JPG Import
+* [ ] Automatic Image Vectorization
+* [ ] Layer Operations
+* [ ] Object Tree Improvements
+* [ ] Path Editing Tools
+* [ ] Node Editing
+* [ ] Boolean Operations
 
 ---
 
 ### Future Goals
 
-* [ ] WiFi job upload
-* [ ] Live PlotOS machine monitoring
-* [ ] Real-time job control
-* [ ] Laser engraver support
-* [ ] Vinyl cutter support
-* [ ] Plugin system
-* [ ] Multi-machine management
+* [ ] Live PlotterNC Monitoring
+* [ ] Real-Time Job Control
+* [ ] Pause / Resume from Browser
+* [ ] Laser Engraver Support
+* [ ] Vinyl Cutter Support
+* [ ] Plugin System
+* [ ] Multi-Machine Management
+* [ ] Cloud Profile Sync
+* [ ] Mobile Companion App
 
 ---
 
 ## Related Projects
 
-### PlotOS
+### PlotterNC
 
 Open-source firmware for ESP32-powered pen plotters and CNC machines.
 
@@ -163,6 +289,7 @@ Repository: Coming Soon
 * CSS3
 * JavaScript
 * SVG Processing
+* Toolpath Generation
 * G-code Generation
 * GitHub Pages
 
@@ -170,9 +297,9 @@ Repository: Coming Soon
 
 ## Project Status
 
-Active Development
+**Active Development**
 
-PlotterNC Studio v0.3 is a functional web-based CAM application capable of importing SVG files, generating optimized toolpaths, previewing jobs, and exporting machine-ready G-code.
+PlotterNC Studio v0.3.7 is a functional browser-based CAM application capable of importing SVG artwork, generating optimized toolpaths, simulating machine motion, and exporting production-ready G-code for pen plotters.
 
 ---
 
@@ -184,4 +311,4 @@ Contributions, bug reports, feature requests, and feedback are welcome.
 
 ## Author
 
-Deaptayan
+**Deaptayan Bondopadhay**

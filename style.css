@@ -16,6 +16,23 @@ html,body{height:100%;overflow:hidden;background:#0d1117;color:#e6edf3;font-fami
 .tbtn{display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:5px;background:transparent;border:1px solid var(--border);color:var(--text-mut);font-size:11px;cursor:pointer;transition:all .12s;white-space:nowrap}
 .tbtn:hover{background:var(--bg-hover);color:var(--text-pri);border-color:#555}
 .tbtn.act{background:var(--cyan-bg);border-color:var(--cyan);color:var(--cyan)}
+.tbtn.primary{
+  background:var(--cyan);border-color:var(--cyan);color:#04201e;
+  font-weight:700;padding:5px 14px;font-size:12px;
+  box-shadow:0 0 0 0 rgba(57,197,187,0.5);
+  animation:slicePulse 2.2s ease-out 2;
+}
+.tbtn.primary:hover{background:#4ddbd0;border-color:#4ddbd0}
+.tbtn.primary:disabled{
+  background:var(--bg-hover);border-color:var(--border);color:var(--text-dim);
+  font-weight:600;cursor:not-allowed;animation:none;box-shadow:none;
+}
+.tbtn.primary:disabled:hover{background:var(--bg-hover)}
+@keyframes slicePulse{
+  0%{box-shadow:0 0 0 0 rgba(57,197,187,0.55)}
+  70%{box-shadow:0 0 0 7px rgba(57,197,187,0)}
+  100%{box-shadow:0 0 0 0 rgba(57,197,187,0)}
+}
 .tbtn.danger{background:#2a1010;border-color:var(--red);color:var(--red)}
 .spacer{flex:1}
 .pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;background:var(--cyan-bg);border:1px solid var(--cyan-mid);color:var(--cyan)}
@@ -42,11 +59,31 @@ html,body{height:100%;overflow:hidden;background:#0d1117;color:#e6edf3;font-fami
 .inp{flex:1;background:var(--bg-deep);border:1px solid var(--border);color:var(--text-pri);border-radius:4px;padding:3px 6px;font-size:11px;min-width:0}
 .inp:focus{outline:none;border-color:var(--cyan)}
 .unit{font-size:10px;color:var(--text-dim);width:28px;flex-shrink:0}
+.fmode-opt{display:flex;align-items:flex-start;gap:7px;padding:6px 7px;border-radius:5px;cursor:pointer;transition:all .1s;border:1px solid transparent}
+.fmode-opt:hover{background:var(--bg-hover)}
+.fmode-opt.active{background:var(--cyan-bg);border-color:var(--cyan-mid)}
+.fmode-opt input[type=checkbox]{margin-top:1px;accent-color:var(--cyan);cursor:pointer;flex-shrink:0}
+.fmode-opt .fmode-txt{display:flex;flex-direction:column;gap:1px}
+.fmode-opt .fmode-title{font-size:11px;color:var(--text-pri);font-weight:600}
+.fmode-opt.active .fmode-title{color:var(--cyan)}
+.fmode-opt .fmode-desc{font-size:9px;color:var(--text-dim);line-height:1.3}
 
 /* CANVAS AREA */
 .canvas-area{flex:1;display:flex;flex-direction:column;background:#080c12;overflow:hidden;min-width:0}
 .ctoolbar{display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--bg-mid);border-bottom:1px solid var(--border);flex-shrink:0}
 .ctoolbar span{font-size:10px;color:var(--text-dim)}
+.bounds-warning{
+  display:flex;align-items:center;gap:9px;padding:7px 14px;flex-shrink:0;
+  background:#3a2406;border-bottom:1px solid #e3b341;color:#ffd27a;font-size:12px;font-weight:600;
+  animation:bwSlide .18s ease-out;
+}
+.bw-icon{font-size:14px;flex-shrink:0}
+.bw-fix{
+  margin-left:auto;background:#e3b341;color:#2a1c04;border:none;border-radius:5px;
+  padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;
+}
+.bw-fix:hover{background:#f0c25e}
+@keyframes bwSlide{ from{transform:translateY(-100%); opacity:0} to{transform:translateY(0); opacity:1} }
 .cwrap{flex:1;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
 canvas#bed{display:block}
 .empty-hint{position:absolute;text-align:center;color:var(--text-dim);pointer-events:none;user-select:none}
@@ -85,6 +122,7 @@ input[type=range]#playSlider::-webkit-slider-thumb{appearance:none;width:14px;he
 .ptitle{font-size:9px;font-weight:700;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px}
 .action-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:5px;border-radius:5px;font-size:11px;cursor:pointer;background:transparent;border:1px solid var(--border);color:var(--text-mut);transition:all .12s;margin-bottom:5px}
 .action-btn:hover{background:var(--bg-hover);color:var(--text-pri)}
+.action-btn:disabled{opacity:0.35;cursor:default;pointer-events:none}
 .action-btn.danger{background:#2a1010;border-color:var(--red);color:var(--red)}
 .info-row{font-size:10px;color:var(--text-mut);margin-bottom:3px}
 .info-row span{color:var(--text-pri)}

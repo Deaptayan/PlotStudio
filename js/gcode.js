@@ -46,6 +46,21 @@ function buildMoves(optimizedSegs, obj){
 // everything up to it. The slider's range now matches this stream's length,
 // so every tick moves the pen by one point, giving smooth, accurate scrubbing
 // and a playStat counter that always matches what's drawn on screen.
+//
+// BUG FIX (hatch-fill lines invisible in "Exact as SVG" mode): an earlier
+// version of this function dropped a move's FIRST point whenever it matched
+// the immediately preceding point, to avoid a zero-length scrub step where
+// one move's end exactly meets the next move's start. But a hatch-fill line
+// is just a 2-point 'draw' move (start, reached by the travel move right
+// before it, and end). That shared start point was always a "duplicate" of
+// the prior travel's endpoint, so it always got dropped — leaving only the
+// line's END point in the stream. A single point can't render a line
+// (moveTo with no matching lineTo draws nothing), so every one of the
+// hundreds of hatch segments silently vanished. The dedup was never actually
+// necessary: render.js's drawToolpathPreview already bridges each run's
+// first segment from the immediately preceding scrub point (see `startIdx`
+// there), so runs join up visually with no gap even without removing
+// "duplicate" points here. Simplest correct fix: don't dedup at all.
 function buildScrubPoints(moves){
   const pts=[];
   let penDown=false;
@@ -54,10 +69,7 @@ function buildScrubPoints(moves){
       penDown=(m.action==='down');
       pts.push({moveIdx,kind:'pen',action:m.action,pt:pts.length?pts[pts.length-1].pt:[0,0]});
     }else if(m.type==='travel'||m.type==='draw'){
-      m.pts.forEach((p,i)=>{
-        // skip the very first point of a segment that's a duplicate of the
-        // current pen position (avoids a zero-length scrub step)
-        if(i===0&&pts.length&&dist(pts[pts.length-1].pt,p)<1e-6) return;
+      m.pts.forEach(p=>{
         pts.push({moveIdx,kind:m.type,pt:p,penDown});
       });
     }
@@ -75,7 +87,7 @@ function movesToGcode(moves,obj){
     return[+x.toFixed(3),+y.toFixed(3)];
   }
   const lines=[];
-  lines.push('; PlotterSlicer v0.3');
+  lines.push('; PlotterNC Studio v0.3');
   lines.push(`; Bed: ${bedW}x${bedH}mm  Origin: ${origin}`);
   lines.push(`; File: ${obj.name}`);
   lines.push(`; Feed: ${feedrate} mm/min  Travel: ${travelSpeed} mm/min`);
@@ -108,15 +120,56 @@ function movesToGcode(moves,obj){
   return lines;
 }
 
+// ─── SHAPE → SEGMENTS (outline, and optionally hatch fill) ──────────────────
+// Samples every subpath of every shape into point arrays. In 'exact' mode,
+// shapes with a real fill (hasFill) additionally get hatch-fill line
+// segments covering their interior, with holes (evenodd subpaths, e.g. eyes
+// cut into a head) correctly left unfilled. Outline strokes are still drawn
+// in both modes — hatch fill alone tends to leave fuzzy/uneven edges, so
+// tracing the exact outline first keeps boundaries crisp.
+function buildShapeSegments(o, vbStep){
+  const raw=[];
+  if(!o.shapes||!o.shapes.length){
+    // Fallback: no shape metadata (shouldn't normally happen) — behave like
+    // outline mode using the flat paths list.
+    o.paths.forEach(d=>{const s=sampleSVGPath(d,vbStep);if(s.length>=2)raw.push(s);});
+    return raw;
+  }
+  o.shapes.forEach(shape=>{
+    const polys=shape.subpaths.map(d=>sampleSVGPath(d,vbStep)).filter(p=>p.length>=3);
+    // always include the outline strokes
+    polys.forEach(p=>raw.push(p));
+    if(S.fillMode==='exact'&&shape.hasFill&&polys.length){
+      const spacingVB=S.hatchSpacing*(o.vbW/(o.w*o.sx));
+      const hatchSegs=hatchFillShape(polys, shape.fillRule, spacingVB, 0);
+      hatchSegs.forEach(([p0,p1])=>raw.push([p0,p1]));
+    }
+  });
+  return raw;
+}
+
 // ─── SLICE ───────────────────────────────────────────────────────────────────
 function slice(){
   if(!S.obj){setStatus('Import an SVG first');return;}
+  // HARD BLOCK: never slice an object that doesn't fully fit the bed. The
+  // Slice button is visually disabled for this same reason (see
+  // updateBoundsWarning in properties.js), but that's just UI — this check
+  // is the actual authority, since a disabled button is not a guarantee
+  // against the function being invoked some other way. Producing G-code for
+  // geometry that hangs off the plottable area isn't useful output to block
+  // gently; it's not valid for the machine to run, so we refuse outright
+  // rather than slicing whatever portion happens to overlap the bed.
+  if(!objectFitsBed(S.obj)){
+    setStatus("Can't slice — object doesn't fit the bed. Use Fit to Bed or resize it first.");
+    updateBoundsWarning();
+    return;
+  }
   setStatus('Slicing…');
   setTimeout(()=>{
     const o=S.obj;
     // step in viewBox units: we want ~0.5mm in mm space → convert
     const vbStep=S.stepSize*(o.vbW/(o.w*o.sx));
-    const raw=o.paths.map(d=>sampleSVGPath(d,vbStep)).filter(s=>s.length>=2);
+    const raw=buildShapeSegments(o, vbStep).filter(s=>s.length>=2);
     if(!raw.length){setStatus('No sampleable paths found');return;}
     const optimized=optimizeSegments(raw);
     S.moves=buildMoves(optimized,o);
@@ -126,7 +179,8 @@ function slice(){
     S.playHead=S.scrubPoints.length;
     renderGcode();
     setSlider(S.scrubPoints.length);
-    setStatus(`Sliced: ${optimized.length} segments → ${S.gcodeLines.length} G-code lines`);
+    const modeLabel=S.fillMode==='exact'?' (filled)':' (outline)';
+    setStatus(`Sliced${modeLabel}: ${optimized.length} segments → ${S.gcodeLines.length} G-code lines`);
     segCount.textContent=`✓ ${optimized.length} segs, ${S.moves.length} moves`;
     segCount.style.display='';
     gcInfo.style.display='';

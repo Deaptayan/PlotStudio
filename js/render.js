@@ -25,26 +25,52 @@ function redraw(){
   if(S.showPreview&&S.scrubPoints.length>0){
     drawToolpathPreview(canvasPt);
   } else {
-    // Edit mode: show SVG outline
+    // Edit mode: show SVG outline. Shapes are filled (translucent) as ONE
+    // Path2D per shape using the shape's own fill-rule, so holes — like the
+    // alien icon's eyes, which are evenodd subpaths cut into the head —
+    // preview correctly as gaps instead of being filled solid.
     const ox=px+o.x*dpi, oy=py+o.y*dpi;
     ctx.save();
     ctx.translate(ox,oy);
     ctx.scale((sw/o.vbW)*dpi,(sh/o.vbH)*dpi);
     ctx.strokeStyle='#39c5bb';ctx.lineWidth=1.5/((sw/o.vbW)*dpi);
-    ctx.fillStyle='rgba(57,197,187,0.05)';
-    o.paths.forEach(d=>{try{const p=new Path2D(d);ctx.stroke(p);ctx.fill(p);}catch(e){}});
+    ctx.fillStyle='rgba(57,197,187,0.10)';
+    const shapes=(o.shapes&&o.shapes.length)?o.shapes:o.paths.map(d=>({subpaths:[d],fillRule:'nonzero',hasFill:false}));
+    shapes.forEach(shape=>{
+      try{
+        const combined=new Path2D();
+        shape.subpaths.forEach(d=>combined.addPath(new Path2D(d)));
+        if(shape.hasFill) ctx.fill(combined, shape.fillRule==='evenodd'?'evenodd':'nonzero');
+        ctx.stroke(combined);
+      }catch(e){}
+    });
     ctx.restore();
     // selection
     ctx.strokeStyle='#39c5bb';ctx.lineWidth=1;ctx.setLineDash([4,3]);
     ctx.strokeRect(ox-2,oy-2,sw*dpi+4,sh*dpi+4);ctx.setLineDash([]);
-    [[ox-2,oy-2],[ox+sw*dpi/2,oy-2],[ox+sw*dpi+2,oy-2],
-     [ox-2,oy+sh*dpi/2],[ox+sw*dpi+2,oy+sh*dpi/2],
-     [ox-2,oy+sh*dpi+2],[ox+sw*dpi/2,oy+sh*dpi+2],[ox+sw*dpi+2,oy+sh*dpi+2]
-    ].forEach(([hx,hy])=>{
-      ctx.fillStyle='#0d1117';ctx.fillRect(hx-4,hy-4,8,8);
+    getHandles(o).forEach(h=>{
+      const hx=px+h.mx*dpi, hy=py+h.my*dpi;
+      const hot=S.hoverHandle===h.id;
+      ctx.fillStyle=hot?'#39c5bb':'#0d1117';
+      ctx.fillRect(hx-4,hy-4,8,8);
       ctx.strokeStyle='#39c5bb';ctx.lineWidth=1.5;ctx.strokeRect(hx-4,hy-4,8,8);
     });
   }
+}
+
+// Returns the 8 resize-handle positions in mm space (id + midpoint coords),
+// computed from the object's current bounding box. Used both for drawing
+// (render.js) and for hit-testing / resize math (main.js) so the two stay
+// perfectly in sync — there is exactly one source of truth for "where are
+// the handles right now".
+function getHandles(o){
+  const x0=o.x, y0=o.y, x1=o.x+o.w*Math.abs(o.sx), y1=o.y+o.h*Math.abs(o.sy);
+  const mx=(x0+x1)/2, my=(y0+y1)/2;
+  return[
+    {id:'nw',mx:x0,my:y0},{id:'n',mx,my:y0},{id:'ne',mx:x1,my:y0},
+    {id:'w',mx:x0,my},                       {id:'e',mx:x1,my},
+    {id:'sw',mx:x0,my:y1},{id:'s',mx,my:y1},{id:'se',mx:x1,my:y1},
+  ];
 }
 
 // Draws the toolpath up to S.playHead using the flattened scrubPoints stream.

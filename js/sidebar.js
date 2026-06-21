@@ -3,6 +3,7 @@ function renderSidebar(){
   const sc=document.getElementById('scontent');
   const sec=S.activeSection;
   if(sec==='file'){
+    const exact=S.fillMode==='exact';
     sc.innerHTML=`
       <div class="stitle">Import</div>
       <div class="drop-zone" id="dropZone">
@@ -13,6 +14,25 @@ function renderSidebar(){
       <div style="margin-top:10px;font-size:10px;color:var(--text-mut)" id="fileInfo">
         ${S.obj?`<b style="color:var(--text-pri)">${S.obj.name}</b><br>${S.obj.paths.length} paths · vb ${S.obj.vbW}×${S.obj.vbH}`:'No file loaded'}
       </div>
+      <div class="stitle" style="margin-top:12px">Fill Mode</div>
+      <div class="fmode-opt ${!exact?'active':''}" id="modeOutline">
+        <input type="checkbox" id="cbOutline" ${!exact?'checked':''}/>
+        <div class="fmode-txt">
+          <span class="fmode-title">Outline Only</span>
+          <span class="fmode-desc">Trace shape edges only — fastest, best for line art</span>
+        </div>
+      </div>
+      <div class="fmode-opt ${exact?'active':''}" id="modeExact">
+        <input type="checkbox" id="cbExact" ${exact?'checked':''}/>
+        <div class="fmode-txt">
+          <span class="fmode-title">Exact as SVG</span>
+          <span class="fmode-desc">Hatch-fill solid regions to match the original artwork</span>
+        </div>
+      </div>
+      ${exact?`
+        <div class="row" style="margin-top:8px"><span class="lbl">Hatch</span><input class="inp" type="number" step="0.05" min="0.05" max="10" id="hatchSpacing" value="${S.hatchSpacing}"/><span class="unit">mm</span></div>
+        <div style="font-size:9px;color:var(--text-dim);margin-top:2px">Smaller = denser fill, much more G-code</div>
+      `:''}
       <div class="stitle" style="margin-top:12px">Sample Quality</div>
       <div class="row"><span class="lbl">Step</span><input class="inp" type="number" step="0.1" min="0.1" max="5" id="stepSize" value="${S.stepSize}"/><span class="unit">mm</span></div>
       <div style="font-size:9px;color:var(--text-dim);margin-top:2px">Smaller = smoother paths, more G-code lines</div>
@@ -21,6 +41,17 @@ function renderSidebar(){
     document.getElementById('dropZone').ondragover=e=>{e.preventDefault();e.currentTarget.classList.add('drag');};
     document.getElementById('dropZone').ondragleave=e=>e.currentTarget.classList.remove('drag');
     document.getElementById('dropZone').ondrop=e=>{e.preventDefault();e.currentTarget.classList.remove('drag');importFile(e.dataTransfer.files[0]);};
+    const setMode=m=>{ if(S.fillMode!==m){ S.fillMode=m; renderSidebar(); } };
+    document.getElementById('modeOutline').onclick=()=>setMode('outline');
+    document.getElementById('modeExact').onclick=()=>setMode('exact');
+    // checkboxes act as a 2-way radio: clicking either always lands on its
+    // own mode (clicking the already-active one is a no-op, never unchecks
+    // both — there is always exactly one mode selected)
+    document.getElementById('cbOutline').onclick=e=>{e.stopPropagation();setMode('outline');};
+    document.getElementById('cbExact').onclick=e=>{e.stopPropagation();setMode('exact');};
+    if(exact){
+      document.getElementById('hatchSpacing').onchange=e=>{S.hatchSpacing=Math.max(0.05,+e.target.value);};
+    }
     document.getElementById('stepSize').onchange=e=>{S.stepSize=Math.max(0.1,+e.target.value);};
     return;
   }
@@ -39,9 +70,9 @@ function renderSidebar(){
       <div class="stitle" style="margin-top:12px">Origin</div>
       ${['Top Left','Bottom Left','Center'].map(o=>`<div class="sitem ${S.origin===o?'active':''}" data-origin="${o}">${o}</div>`).join('')}
     `;
-    sc.querySelectorAll('[data-bw]').forEach(el=>el.onclick=()=>{S.bedW=+el.dataset.bw;S.bedH=+el.dataset.bh;updateBedLabels();renderSidebar();redraw();});
+    sc.querySelectorAll('[data-bw]').forEach(el=>el.onclick=()=>{S.bedW=+el.dataset.bw;S.bedH=+el.dataset.bh;updateBedLabels();renderSidebar();redraw();updateBoundsWarning();});
     document.getElementById('customToggle').onclick=()=>{const cb=document.getElementById('customBed');cb.style.display=cb.style.display==='none'?'':'none';};
-    document.getElementById('applyCustom').onclick=()=>{S.bedW=+document.getElementById('cbw').value||200;S.bedH=+document.getElementById('cbh').value||200;updateBedLabels();renderSidebar();redraw();};
+    document.getElementById('applyCustom').onclick=()=>{S.bedW=+document.getElementById('cbw').value||200;S.bedH=+document.getElementById('cbh').value||200;updateBedLabels();renderSidebar();redraw();updateBoundsWarning();};
     sc.querySelectorAll('[data-origin]').forEach(el=>el.onclick=()=>{S.origin=el.dataset.origin;updateBedLabels();renderSidebar();redraw();});
     return;
   }
