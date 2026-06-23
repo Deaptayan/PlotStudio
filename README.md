@@ -1,5 +1,6 @@
 ![Version](https://img.shields.io/badge/version-v0.3.7-blue)
 ![Status](https://img.shields.io/badge/status-active-success)
+![License](https://img.shields.io/badge/license-AGPL--3.0-green)
 
 # PlotterNC Studio
 
@@ -279,7 +280,7 @@ https://deaptayan.github.io/PlotterNCStudio/
 
 Open-source firmware for ESP32-powered pen plotters and CNC machines.
 
-Repository: Coming Soon
+Repository: https://github.com/Deaptayan/PlotterNC
 
 ---
 
