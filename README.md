@@ -143,8 +143,7 @@ Export
 
 ## Try it Now
 
-**PlotterNC Studio Demo:**
-https://deaptayan.github.io/PlotterNCStudio/
+**PlotterNC Studio Demo:** [plotterncstudio.deaptayan.in](https://plotterncstudio.deaptayan.in/)
 
 ---
 
